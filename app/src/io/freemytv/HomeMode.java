@@ -430,15 +430,17 @@ final class HomeMode {
                     }
                 }
                 Set<String> disabled = new HashSet<>(stringList(s, "disabled"));
-                wanted.removeAll(stringList(s, "keptOff"));
+                // Off before Free My TV: turned off again if a TV update brings one back, but never handed to
+                // Original to turn on.
+                List<String> keptOff = stringList(s, "keptOff");
                 for (String pkg : sorted(wanted)) {
                     if (PROTECTED.contains(pkg) || !present.contains(pkg) || owners.contains(pkg)) continue;
                     if (disabledNow.contains(pkg)) {
-                        disabled.add(pkg);
+                        if (!keptOff.contains(pkg)) disabled.add(pkg);
                         continue;
                     }
                     if (adb.shell("pm disable-user --user 0 " + pkg).contains("disabled-user")) {
-                        disabled.add(pkg);
+                        if (!keptOff.contains(pkg)) disabled.add(pkg);
                         fixed.add(pkg);
                     }
                 }

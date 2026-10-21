@@ -52,7 +52,7 @@ About ten minutes. You need a Google TV or Android TV (Android 9 or newer) and a
    brew install --cask temurin android-commandlinetools android-platform-tools
    sdkmanager "build-tools;34.0.0" "platforms;android-34"
    ```
-   On Linux, get OpenJDK 17, Android's command-line tools and adb from your package manager, then run the same `sdkmanager` line. On Windows, use WSL.
+   On Linux, get OpenJDK 17, Android's command-line tools and adb from your package manager, then run the same `sdkmanager` line. On Windows, use Git Bash (which Claude Code uses there) or WSL.
 3. **Build:**
    ```bash
    ./build.sh
