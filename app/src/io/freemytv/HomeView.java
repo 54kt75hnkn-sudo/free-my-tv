@@ -1348,16 +1348,17 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
 
     /**
      * Logo at its "optical" size (all with the same amount of ink, plus each one's own adjustment, never past 80% × 62%
-     * of the tile), centered and already filtered down to the focused tile size: when focused it is drawn pixel for
-     * pixel, without resampling.
+     * of the tile), centered and already filtered down to the focused tile size and to the resting one: focused or at
+     * rest it is drawn pixel for pixel, without resampling (on a 720p UI, shrinking at draw time made it look jagged).
      */
     private void drawLogo(Canvas c, HomeApps.Item it, RectF box, float s, int mode) {
-        Bitmap logo = crispLogo(it, mode == 2 && it.logoDark != null);
+        boolean rest = s < 1 + FOCUS_GROW / 2;
+        Bitmap logo = crispLogo(it, mode == 2 && it.logoDark != null, rest);
         if (logo == null) return;
-        float scale = s / (1 + FOCUS_GROW);
+        float scale = rest ? s : s / (1 + FOCUS_GROW);
         float dw = logo.getWidth() * scale, dh = logo.getHeight() * scale;
         float left = box.centerX() - dw / 2, top = box.centerY() - dh / 2;
-        if (scale > 0.998f) {
+        if (rest ? Math.abs(scale - 1) < 0.002f : scale > 0.998f) {
             left = Math.round(left);
             top = Math.round(top);
         }
@@ -1367,16 +1368,17 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
         bitmapPaint.setColorFilter(null);
     }
 
-    private Bitmap crispLogo(HomeApps.Item it, boolean dark) {
+    private Bitmap crispLogo(HomeApps.Item it, boolean dark, boolean rest) {
         Bitmap src = dark ? it.logoDark : it.logo;
         if (tileRects.length == 0) return src;
-        String key = it.key + "@" + System.identityHashCode(src) + "@" + Math.round(tileRects[0].width());
+        String key = it.key + "@" + System.identityHashCode(src) + "@" + Math.round(tileRects[0].width()) + (rest ? "@rest" : "");
         Bitmap cached = crispLogos.get(key);
         if (cached != null) return cached;
         float bw = tileRects[0].width() * (1 + FOCUS_GROW), bh = tileRects[0].height() * (1 + FOCUS_GROW);
         float lw = src.getWidth(), lh = src.getHeight();
         float scale = (float) Math.sqrt(bw * bh * 0.085f / (lw * lh * Math.max(0.08f, it.logoInk))) * it.logoScale;
         scale = Math.min(scale, Math.min(bw * 0.76f / lw, bh * 0.58f / lh));
+        if (rest) scale /= 1 + FOCUS_GROW;
         Bitmap out = downscale(src, Math.round(lw * scale), Math.round(lh * scale));
         crispLogos.put(key, out);
         return out;
