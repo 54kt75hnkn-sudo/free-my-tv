@@ -8,7 +8,7 @@ import android.os.Build;
 
 /**
  * A recorded drawing that can be replayed with an alpha and a translation: a RenderNode on Android 10+, a Picture on
- * Android 9 (no RenderNode). Only Node touches RenderNode, so the classes that use Recording still verify on Android 9.
+ * Android 9 and older (no RenderNode). Only Node touches RenderNode, so the classes that use Recording still verify there.
  */
 abstract class Recording {
     static Recording create(String name) {
