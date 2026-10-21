@@ -142,13 +142,19 @@ def main():
     if len(args) != 1:
         sys.exit(__doc__)
     ip = args[0]
-    if not os.path.exists(WGT):
-        sys.exit('Build and sign it first: python3 tizen/build.py --sign <profile>')
-    with zipfile.ZipFile(WGT) as z:
-        if 'author-signature.xml' not in z.namelist():
-            sys.exit('FreeMyTV-tizen.wgt isn\'t signed, and the TV only installs signed apps: '
-                     'python3 tizen/build.py --sign <profile>')
-        manifest = z.read('config.xml').decode('utf-8')
+    uninstall = '--uninstall' in sys.argv
+    if uninstall:
+        # Removing needs only the app's ids: the manifest the package is built from has them, so no build is needed.
+        with open(os.path.join(ROOT, 'tizen', 'config.xml'), encoding='utf-8') as f:
+            manifest = f.read()
+    else:
+        if not os.path.exists(WGT):
+            sys.exit('Build and sign it first: python3 tizen/build.py --sign <profile>')
+        with zipfile.ZipFile(WGT) as z:
+            if 'author-signature.xml' not in z.namelist():
+                sys.exit('FreeMyTV-tizen.wgt isn\'t signed, and the TV only installs signed apps: '
+                         'python3 tizen/build.py --sign <profile>')
+            manifest = z.read('config.xml').decode('utf-8')
     tag = re.search(r'<tizen:application[^>]*>', manifest).group(0)
     app_id = re.search(r'\bid="([^"]+)"', tag).group(1)
     package = re.search(r'\bpackage="([^"]+)"', tag).group(1)
@@ -162,7 +168,7 @@ def main():
     print('Connected: %s, Tizen %s.' % (sdb.banner.split(':')[2] if sdb.banner.count(':') >= 2 else sdb.banner,
                                          caps.get('platform_version', '?')))
 
-    if '--uninstall' in sys.argv:
+    if uninstall:
         out = sdb.shell('0 vd_appuninstall ' + package, r'spend time', 120)
         print('Removed.' if re.search(r'uninstall completed|cmd_ret:0', out) else 'The TV said:\n' + out.strip())
         return
