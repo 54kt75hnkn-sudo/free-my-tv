@@ -144,9 +144,9 @@ HDMI (Chromecast with Google TV, Google TV Streamer, onn 4K, NVIDIA Shield). Set
   app's default process, without a home activity); `res/values-v30/bools.xml` picks it, every other version keeps
   `Screensaver` in `:home`. Keep both in step.
   To check for newer APIs, compile against `platforms/android-26/android.jar`: only AGSL (`RuntimeShader`, guarded
-  by a try/catch), `BitmapShader.setFilterMode` (guarded) and `Recording.Node` should come up.
+  by a try/catch), `BitmapShader.setFilterMode` (guarded), `Recording.Node` and `Ui.Weighted` (the Android 9 font weight) should come up.
 - The home screen is drawn by hand on one Canvas (`HomeView`); the glass and the sky are AGSL shaders (`Shaders`,
-  Android 13+, with a fallback for 9 to 12). Keep it at 60 fps: no allocations in `onDraw`, no work on the UI thread.
+  Android 13+, with a fallback for 8 to 12). Keep it at 60 fps: no allocations in `onDraw`, no work on the UI thread.
 - `HomeMode` runs every switch as a background job (`ModeJob`) in the main process; the UI is in the `:home`
   process. `Watchdog` goes back to the stock home screen after 3 crashes in 5 minutes.
 - On-screen text: `Ui.tr("pt", "en")`, with the Spanish, German and Russian in `Spanish.java`, `German.java` and

@@ -62,8 +62,15 @@ final class Ui {
             }
         }
         // Typeface.create(family, weight, italic) is Android 9+; Android 8 only has regular and bold.
-        if (Build.VERSION.SDK_INT >= 28) return Typeface.create(Typeface.DEFAULT, weight, false);
+        if (Build.VERSION.SDK_INT >= 28) return Weighted.create(weight);
         return Typeface.create(Typeface.DEFAULT, weight >= 600 ? Typeface.BOLD : Typeface.NORMAL);
+    }
+
+    /** Only this class touches the Android 9 call, so Ui itself still verifies on Android 8 (like Recording.Node). */
+    private static final class Weighted {
+        static Typeface create(int weight) {
+            return Typeface.create(Typeface.DEFAULT, weight, false);
+        }
     }
 
     private static final String FONT = "fonts/InterVariable.ttf";
