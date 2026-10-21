@@ -2843,13 +2843,14 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     private boolean moveLight(int dx, int dy) {
         switch (zone) {
             case Z_SHELF:
-                if (dy >= 0 || shelf.isEmpty()) return false;
+                // Up from an empty shelf too: move()'s older zones (the hero, the corner capsule) aren't drawn any more.
+                if (dy >= 0) return false;
                 if (cards.isEmpty()) {
                     zone = Z_TOP;
                     topIndex = picksOn() ? tab : 3;
                 } else {
                     zone = Z_CARDS;
-                    cardIndex = nearest(cardRects, cards.size(), tileRects[shelfIndex].centerX());
+                    cardIndex = nearest(cardRects, cards.size(), shelf.isEmpty() ? w / 2f : tileRects[shelfIndex].centerX());
                 }
                 break;
             case Z_CARDS:
