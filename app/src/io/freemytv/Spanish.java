@@ -115,6 +115,11 @@ final class Spanish {
             case "TCL Channel button": return "Botón TCL Channel";
             case "Tabii button": return "Botón Tabii";
             case "Nothing": return "Nada";
+            case "BRAVIA CORE button": return "Botón BRAVIA CORE";
+            case "Disney+ button": return "Botón Disney+";
+            case "Crunchyroll button": return "Botón Crunchyroll";
+            case "Sony default": return "Predeterminado de Sony";
+            case "Sony default: the button opens what it always did.": return "Predeterminado de Sony: el botón abre lo de siempre.";
             case "Not installed": return "No instalada";
             case ", selected": return ", seleccionado";
             case "OK or the arrows change the value.": return "OK o las flechas cambian el valor.";

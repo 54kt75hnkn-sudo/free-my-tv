@@ -122,6 +122,11 @@ final class Russian {
             case "TCL Channel button": return "Кнопка TCL Channel";
             case "Tabii button": return "Кнопка Tabii";
             case "Nothing": return "Ничего";
+            case "BRAVIA CORE button": return "Кнопка BRAVIA CORE";
+            case "Disney+ button": return "Кнопка Disney+";
+            case "Crunchyroll button": return "Кнопка Crunchyroll";
+            case "Sony default": return "Как задано Sony";
+            case "Sony default: the button opens what it always did.": return "Как задано Sony: кнопка открывает то же, что и раньше.";
             case "Not installed": return "Не установлено";
             case ", selected": return ", выбрано";
             case "OK or the arrows change the value.": return "Нажмите OK или стрелки, чтобы изменить значение.";

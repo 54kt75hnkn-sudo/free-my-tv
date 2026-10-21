@@ -86,6 +86,7 @@ final class HomeApps {
         {"max", "Max", "com.wbd.stream", "6C3BE0", "", "1.32"},
         {"max", "HBO Max", "com.hbo.hbonow", "6C3BE0", "", "1.32"},
         {"appletv", "Apple TV", "com.apple.atve.androidtv.appletv", "B8BCC6", "", "1.1"},
+        {"appletv", "Apple TV", "com.apple.atve.sony.appletv", "B8BCC6", "", "1.1"},   // Sony's own build
         {"hulu", "Hulu", "com.hulu.livingroomplus", "1CE783", "", "1"},
         {"paramount", "Paramount+", "com.cbs.ott", "0064FF", "", "1"},
         {"peacock", "Peacock", "com.peacocktv.peacockandroid", "6E55DC", "", "1"},

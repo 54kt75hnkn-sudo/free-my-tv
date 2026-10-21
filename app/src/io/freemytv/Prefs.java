@@ -27,7 +27,14 @@ final class Prefs {
     static final int KEY_VESTEL_NETFLIX = KeyEvent.KEYCODE_STEM_1;
     /** KTC's (NextStar) Tabii button: BUTTON_8, which the TV hands to its hot-key receiver (its log: "keycode = 195"). */
     static final int KEY_KTC_TABII = KeyEvent.KEYCODE_BUTTON_8;
-    static final int[] KEYS = RemoteKeys.VESTEL ? new int[] {KEY_VESTEL_NETFLIX} : RemoteKeys.KTC ? new int[] {KEY_KTC_TABII}
+    /** Sony's app buttons, as SONY_KEY + scan code (read from a BRAVIA's log; the key codes are shared). */
+    static final int SONY_KEY = 100_000;
+    static final int KEY_SONY_CORE = SONY_KEY + 496, KEY_SONY_NETFLIX = SONY_KEY + 583, KEY_SONY_DISNEY = SONY_KEY + 491,
+            KEY_SONY_PRIME = SONY_KEY + 490, KEY_SONY_YOUTUBE = SONY_KEY + 485, KEY_SONY_CRUNCHYROLL = SONY_KEY + 507;
+    static final int[] KEYS = RemoteKeys.SONY
+            ? new int[] {KEY_SONY_CORE, KEY_SONY_NETFLIX, KEY_SONY_DISNEY, KEY_SONY_PRIME, KEY_SONY_YOUTUBE, KEY_SONY_CRUNCHYROLL}
+            : RemoteKeys.VESTEL ? new int[] {KEY_VESTEL_NETFLIX}
+            : RemoteKeys.KTC ? new int[] {KEY_KTC_TABII}
             : new int[] {KEY_NETFLIX, KEY_YOUTUBE, KEY_PRIME, KEY_TCL_CHANNEL};
 
     /** Bumped by every change: screens compare it to know when to redraw. */

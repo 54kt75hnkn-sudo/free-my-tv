@@ -75,6 +75,7 @@ final class Recs {
         {"max", "max", "com.wbd.stream"},
         {"max", "max", "com.hbo.hbonow"},
         {"apple tv", "appletv", "com.apple.atve.androidtv.appletv"},
+        {"apple tv", "appletv", "com.apple.atve.sony.appletv"},   // Sony's own build
     };
     private static final Map<String, String> SERVICE_NAME = new HashMap<>();
     static {
@@ -569,6 +570,7 @@ final class Recs {
         return best;
     }
 
+    /** The SERVICES row for a TMDB name: the installed one first, when a service has more than one package. */
     private String[] service(String name) {
         String n = name.toLowerCase(Locale.ROOT);
         String[] first = null;
