@@ -1188,7 +1188,8 @@ final class HomeView extends ViewGroup implements Choreographer.FrameCallback, H
     /** Coin logo + price in the configured currency, in a row at the right end of the tab bar. */
     private void drawQuotes(Canvas c) {
         boolean clock = !picksOn();
-        float right = platterRect.isEmpty() ? CONTENT_R * k : platterRect.right - SHELF_PAD * k;
+        // At the right margin, under the round buttons: the shelf's glass is narrower and centred with few apps.
+        float right = CONTENT_R * k;
         applyTone();
         Paint text = clock ? lClockQuote : lQuote;
         // The corner buttons' names appear in this row: the quotes fade out while one of them has focus.
