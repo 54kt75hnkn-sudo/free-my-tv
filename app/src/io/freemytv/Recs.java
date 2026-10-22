@@ -24,10 +24,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -605,13 +607,19 @@ final class Recs {
     }
 
     private boolean needsLink(Pick p) {
-        return !Config.WATCHMODE_KEY.trim().isEmpty() && p.pkg != null && p.link == null
+        return linksOn() && p.pkg != null && p.link == null
                 && cache.getString(linkKey(p), null) == null && System.currentTimeMillis() >= linkRetryAt;
+    }
+
+    /** A key is set and Watchmode hasn't refused it (a refused key isn't tried again until it changes). */
+    private boolean linksOn() {
+        String key = Config.WATCHMODE_KEY.trim();
+        return !key.isEmpty() && cache.getInt("wm:refused", 0) != key.hashCode();
     }
 
     /** Sets p.link from what was looked up before, or looks it up (2 requests of the free plan's 2,500 a month). */
     private void findLink(Pick p) {
-        if (Config.WATCHMODE_KEY.trim().isEmpty() || p.pkg == null || p.link != null) return;
+        if (!linksOn() || p.pkg == null || p.link != null) return;
         String saved = cache.getString(linkKey(p), null);
         if (saved != null) {
             p.link = saved.isEmpty() ? null : saved;
@@ -631,12 +639,15 @@ final class Recs {
                     String name = s.optString("name").toLowerCase(Locale.ROOT).replace(" ", "");
                     String want = service[0].replace(" ", "");
                     boolean same = want.equals("max") ? name.equals("max") : name.contains(want);
-                    if (same && s.optString("type").equals("sub")) link = s.optString("web_url");
+                    if (same && s.optString("type").equals("sub") && s.optString("web_url").startsWith("https://")) link = s.optString("web_url");
                 }
             }
             cache.edit().putString(linkKey(p), link).apply();
             p.link = link.isEmpty() ? null : link;
         } catch (Exception e) {
+            if ("Watchmode returned HTTP 401".equals(e.getMessage())) {
+                cache.edit().putInt("wm:refused", Config.WATCHMODE_KEY.trim().hashCode()).apply();
+            }
             linkRetryAt = System.currentTimeMillis() + 10 * 60_000L;   // quota or network: not again right away
             AppLog.w("watchmode: " + e.getMessage());
         }
@@ -775,9 +786,14 @@ final class Recs {
                         .put("meta", p.meta).put("app", p.app == null ? "" : p.app).put("pkg", p.pkg == null ? "" : p.pkg)
                         .put("detailed", p.detailed));
             }
-            cache.edit().putString("picks", a.toString()).putInt("period", period).putLong("listAt", listAt)
+            SharedPreferences.Editor e = cache.edit().putString("picks", a.toString()).putInt("period", period).putLong("listAt", listAt)
                     .putString("language", listLanguage)
-                    .putLong("keyStamp", keyStamp).putInt("version", CACHE_VERSION).apply();
+                    .putLong("keyStamp", keyStamp).putInt("version", CACHE_VERSION);
+            // Watchmode links of titles no longer in the list go (the refused-key mark stays).
+            Set<String> keep = new HashSet<>();
+            for (Pick p : picks) keep.add(linkKey(p));
+            for (String k : cache.getAll().keySet()) if (k.startsWith("wm:") && !k.equals("wm:refused") && !keep.contains(k)) e.remove(k);
+            e.apply();
         } catch (Exception ignored) {
         }
     }
