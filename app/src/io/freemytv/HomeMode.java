@@ -65,7 +65,7 @@ final class HomeMode {
         "com.tcl.repairguide", "com.tcl.ocean.instructions", "com.tcl.logkit",        // repair guide, manual, logs
         // Multilaser (Expressluck / CVTE board)
         "tv.anoki.acr.anokiacroptin",                                                 // Anoki ACR: watches what's on screen
-        "fusion.android.tv.demo", "com.expressluck.tvhelpmanual",                     // store demo, manual
+        "fusion.android.tv.demo", "com.expressluck.tvhelpmanual",                     // store demo (also Xiaomi projectors), manual
         // Philco (Homwee/Changhong)
         "com.homwee.aipont",                                                          // AI PONT: promo channels, app downloads
         "com.homwee.help",                                                            // user manual
@@ -129,7 +129,13 @@ final class HomeMode {
         "com.mediatek.dtv.tvinput.dvbtuner", "com.mediatek.tv.oneworld.wizardkt", "com.mediatek.tv.settings",
         "com.mediatek.tv.systemupdater", "com.mediatek.extservice", "com.mediatek.dialservice", "com.mediatek.miracast",
         "com.mediatek.tv.launcher.partner", "com.google.android.tv.googletvremotepairer", "com.ktc.serialport",
-        "com.ktc.tv.factory", "ktc.factorymenu.ui"));
+        "com.ktc.tv.factory", "ktc.factorymenu.ui",
+        // Xiaomi projectors (Fengmi/Formovie, MediaTek): keystone, focus, picture and sound, system service, remote
+        // pairing, settings provider, factory tests, launcher config, Freeview live TV
+        "com.fengmi.projector.imaging", "com.fengmi.platform", "com.fengmi.Autopair", "com.fengmi.fmsettings",
+        "com.fengmi.testsuite", "android.autoinstalls.config.fomovie",
+        "uk.co.freeview.tifbridge",
+        "uk.co.freeview.mdsclient", "uk.co.freeview.fvpconfigauth"));
 
     /** One switch at a time (jobs can overlap: a boot check and a button press). */
     private static final Object RUN = new Object();
@@ -160,7 +166,7 @@ final class HomeMode {
 
     /**
      * The remote's app buttons (RemoteKeys) need an accessibility service that only filters those keys. It is on only
-     * on TCL, Vestel and Sony TVs in Free My TV mode, and goes off with Original. Android turns it off when this app is updated, so the
+     * on TCL, Vestel, KTC and Sony TVs (and Formovie projectors) in Free My TV mode, and goes off with Original. Android turns it off when this app is updated, so the
      * boot check and an update turn it back on.
      */
     static void ensureRemoteService(Context c, long delayMs) {
