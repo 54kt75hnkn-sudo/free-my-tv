@@ -81,6 +81,8 @@ final class Recs {
         {"apple tv", "appletv", "com.apple.atve.sony.appletv"},   // Sony's own build
         {"hotstar", "hotstar", "in.startv.hotstar"},   // TMDB: "JioHotstar" (earlier "Disney Plus Hotstar")
         {"okko", "okko", "ru.more.play"},
+        {"crunchyroll", "crunchyroll", "com.crunchyroll.crunchyroid"},
+        {"oneplay", "oneplay", "net.cme.voyo.cz.tvapp"},    // Czechia: Voyo and O2 TV became Oneplay, same app
     };
     private static final Map<String, String> SERVICE_NAME = new HashMap<>();
     static {
@@ -95,6 +97,8 @@ final class Recs {
         SERVICE_NAME.put("appletv", "Apple TV");
         SERVICE_NAME.put("hotstar", "JioHotstar");
         SERVICE_NAME.put("okko", "Okko");
+        SERVICE_NAME.put("crunchyroll", "Crunchyroll");
+        SERVICE_NAME.put("oneplay", "Oneplay");
     }
     /** Country for "what streams where" (config.properties "tmdb_region", e.g. US, GB, BR). */
     private static final String REGION = Config.TMDB_REGION.trim().toUpperCase(Locale.ROOT);

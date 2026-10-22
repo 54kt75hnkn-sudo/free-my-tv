@@ -223,7 +223,8 @@ var Data = (function () {
     ['globoplay', 'globoplay', /globoplay/, /globoplay/i, 'Globoplay'],
     ['max', 'max', /hbo|wbd|\.max/, /^(hbo )?max$|hbo max/i, 'Max'],
     ['apple tv', 'appletv', /appletv|apple\.tv/, /apple tv/i, 'Apple TV'],
-    ['hotstar', 'hotstar', /hotstar/, /hotstar/i, 'JioHotstar']
+    ['hotstar', 'hotstar', /hotstar/, /hotstar/i, 'JioHotstar'],
+    ['crunchyroll', 'crunchyroll', /crunchyroll/, /crunchyroll/i, 'Crunchyroll']
   ];
 
   var installed = [];   // the TV's apps, from TV.apps()
