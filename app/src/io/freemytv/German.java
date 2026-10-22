@@ -137,7 +137,7 @@ final class German {
             case "YouTube, Prime Video and Google Play: the TV itself controls those buttons.": return "YouTube, Prime Video und Google Play: Diese Tasten steuert der Fernseher selbst.";
             case "Netflix, YouTube and Prime Video: the TV itself controls those buttons.": return "Netflix, YouTube und Prime Video: Diese Tasten steuert der Fernseher selbst.";
             case "The other buttons: the TV itself controls them.": return "Die anderen Tasten steuert der Fernseher selbst.";
-            case "These are the TCL remote's buttons: on this TV, the buttons work as they always did.": return "Das sind die Tasten der TCL-Fernbedienung: Auf diesem Fernseher funktionieren sie wie immer.";
+            case "TCL remote buttons: on this TV they work as always.": return "TCL-Fernbedienung: Die Tasten funktionieren hier wie immer.";
             default:
                 if (english.startsWith("Free My TV is on: new home screen and screensaver, ")) {
                     return "Free My TV ist an: neuer Startbildschirm und Bildschirmschoner, "

@@ -961,8 +961,8 @@ public class SettingsActivity extends Activity {
                         : RemoteKeys.FORMOVIE ? Ui.tr("Os outros botões: a própria TV os controla.", "The other buttons: the TV itself controls them.")
                         : RemoteKeys.supported() ? Ui.tr("Disney e Globoplay: a própria TV controla esses botões.",
                         "Disney and Globoplay: the TV itself controls those buttons.")
-                        : Ui.tr("Esses são os botões do controle da TCL: nesta TV, os botões funcionam como sempre.",
-                        "These are the TCL remote's buttons: on this TV, the buttons work as they always did."), LIST_X * k + 30 * k, hy + 38 * k, hint);
+                        : Ui.tr("Botões do controle da TCL: nesta TV funcionam como sempre.",
+                        "TCL remote buttons: on this TV they work as always."), LIST_X * k + 30 * k, hy + 38 * k, hint);
             }
         }
 
