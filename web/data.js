@@ -142,6 +142,16 @@ var Data = (function () {
   var COINS = ['BTC', 'ETH', 'SOL', 'USDT'];
   var CURRENCY = Place.currency;
   var QUOTE = CURRENCY === 'USD' ? 'USDT' : CURRENCY;
+  /** Binance refuses the whole request when it has no pairs in the currency (INR...): the prices go in dollars then. */
+  function inDollars() {
+    store('dollarsFor', CURRENCY);
+    CURRENCY = 'USD';
+    QUOTE = 'USDT';
+  }
+  if (stored('dollarsFor') === CURRENCY && CURRENCY !== 'USD') {
+    CURRENCY = 'USD';
+    QUOTE = 'USDT';
+  }
   var prices = [NaN, NaN, NaN, NaN], changes = [NaN, NaN, NaN, NaN], pricesAt = 0, fetchingPrices = false;
 
   /** Indexes in COINS of the coins that are on (the dollar only in Brazilian reais, where Binance lists it). */
@@ -181,8 +191,10 @@ var Data = (function () {
     var hosts = ['https://api.binance.com', 'https://api.binance.us'];
     (function next(h) {
       get(hosts[h] + path, {}, function (err, body) {
+        // A pair Binance doesn't list (HTTP 400): the prices go in dollars.
+        if (err && err.message === 'HTTP 400' && QUOTE !== 'USDT') { fetchingPrices = false; inDollars(); refreshPrices(); return; }
         if (err || !parsePrices(body)) {
-          if (h + 1 < hosts.length) next(h + 1);
+          if (h + 1 < hosts.length && !(err && err.message === 'HTTP 400')) next(h + 1);
           else fetchingPrices = false;
           return;
         }
