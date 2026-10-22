@@ -203,6 +203,7 @@ final class HomeMode {
             if (home.isEmpty() || home.startsWith(PKG + "/")) {
                 String found = currentHome(adb);
                 home = found != null ? realHome(found) : "";
+                if (home.isEmpty()) AppLog.w("original home screen not recorded (HOME resolves to \"" + homeHolder(adb) + "\"): Original will pick the TV's own");
             }
             String dream = originalDream(s);
             if (dream.isEmpty()) dream = defaultDream(adb);
@@ -331,15 +332,47 @@ final class HomeMode {
         }
     }
 
-    /** The recorded home screen; without one, Google TV's; without that, the system picks (we leave the role). */
+    /**
+     * The recorded home screen; without one, Google TV's; without that, the TV's own (stockHome); and as the last
+     * resort the system picks (we leave the role, which Android 10 and older can't do: they have no `cmd role`).
+     */
     private static boolean restoreHome(Adb adb, String home) throws IOException {
         if (home.isEmpty() && adb.shell("pm path " + packageOf(GOOGLE_HOME)).contains("package:")) home = GOOGLE_HOME;
         if (!home.isEmpty()) {
             adb.shell("pm enable " + packageOf(home));
             if (adb.shell("cmd package set-home-activity '" + home + "'").contains("Success")) return true;
         }
+        String stock = stockHome(adb);
+        if (stock != null && !stock.equals(home)) {
+            adb.shell("pm enable " + packageOf(stock));
+            if (adb.shell("cmd package set-home-activity '" + stock + "'").contains("Success")) return true;
+        }
         adb.shell("cmd role remove-role-holder --user 0 android.app.role.HOME " + PKG);
         return !homeHolder(adb).contains(PKG);
+    }
+
+    /**
+     * The TV's own home screen when none was recorded (seen on a Philips TPM171E, Android 8, at the first switch): a
+     * system app that opens HOME, other than ours, Google TV's setup app (it opens HOME through its recovery activity)
+     * and Android's bare "fallback home". Never a launcher the person installed. null when there isn't exactly one.
+     */
+    private static String stockHome(Adb adb) throws IOException {
+        Set<String> system = new HashSet<>();
+        for (String line : adb.shell("pm list packages -s").split("\n")) {
+            line = line.trim();
+            if (line.startsWith("package:")) system.add(line.substring(8));
+        }
+        String found = null;
+        for (String line : adb.shell("cmd package query-activities --brief --user 0 -a android.intent.action.MAIN"
+                + " -c android.intent.category.HOME").split("\n")) {
+            line = line.trim();
+            if (!COMPONENT.matcher(line).matches() || line.startsWith(PKG + "/") || line.startsWith(GOOGLE_SETUP + "/")
+                    || line.contains("FallbackHome")) continue;
+            if (!system.contains(packageOf(line))) continue;
+            if (found != null) return null;      // two system home screens: don't guess
+            found = line;
+        }
+        return found;
     }
 
     /** Safety net: our home screen crashed 3 times in a row. The home screen and the screensaver go back; the rest stays. */
