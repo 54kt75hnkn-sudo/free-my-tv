@@ -266,7 +266,13 @@ final class HomeMode {
             Set<String> disabled = new HashSet<>(stringList(state(c), "disabled"));
             Set<String> present = packages(adb, "");
             Set<String> keptOff = new HashSet<>(stringList(state(c), "keptOff"));
-            for (String pkg : packages(adb, "-d")) if (targets(home, dream, true).contains(pkg) && !disabled.contains(pkg)) keptOff.add(pkg);
+            // Off now and not on our list: the person turned it off, unless an earlier install of Free My TV did (its
+            // list lives in the TV's settings too, since an uninstall erases our state file).
+            Set<String> ours = recorded(adb);
+            for (String pkg : packages(adb, "-d")) {
+                if (targets(home, dream, true).contains(pkg) && !disabled.contains(pkg) && !ours.contains(pkg)) keptOff.add(pkg);
+            }
+            keptOff.removeAll(ours);
             JSONObject before = state(c);
             before.put("keptOff", new JSONArray(sorted(keptOff)));
             save(c, before);
@@ -285,6 +291,7 @@ final class HomeMode {
                     AppLog.w("could not turn off " + pkg + ": " + out.trim());
                 }
             }
+            record(adb, disabled);
             s = state(c);
             s.put("mode", FREE).put("since", System.currentTimeMillis()).put("homeReverted", false)
                     .put("disabled", new JSONArray(sorted(disabled))).put("setupHome", setupHome);
@@ -329,6 +336,7 @@ final class HomeMode {
                 String out = adb.shell("pm enable " + pkg);
                 if (!out.contains("new state: enabled")) failed.add(pkg);
             }
+            record(adb, new HashSet<>(failed));
             busy(c, Ui.tr("Devolvendo o Início original…", "Restoring the original home screen…"));
             boolean homeOk = restoreHome(adb, home);
             restoreScreensaver(adb, s);
@@ -388,9 +396,14 @@ final class HomeMode {
                 String homePkg = packageOf(home), dreamPkg = packageOf(originalDream(s));
                 if (dreamPkg != null && !keptOff.contains(dreamPkg)) adb.shell("pm enable " + dreamPkg);
                 JSONArray kept = new JSONArray();
+                Set<String> stillOff = new HashSet<>();
                 for (String pkg : stringList(s, "disabled")) {
-                    if (!pkg.equals(GOOGLE_SETUP) && !pkg.equals(homePkg) && !pkg.equals(dreamPkg)) kept.put(pkg);
+                    if (!pkg.equals(GOOGLE_SETUP) && !pkg.equals(homePkg) && !pkg.equals(dreamPkg)) {
+                        kept.put(pkg);
+                        stillOff.add(pkg);
+                    }
                 }
+                record(adb, stillOff);
                 // The screensaver first: if that fails, the revert isn't marked done and the next try does it again.
                 restoreScreensaver(adb, s);
                 s.put("homeReverted", true).put("disabled", kept);
@@ -458,6 +471,7 @@ final class HomeMode {
                     adb.shell("settings put secure screensaver_components " + DREAM);
                     fixed.add(Ui.tr("a tela de descanso", "the screensaver"));
                 }
+                record(adb, disabled);
                 JSONObject latest = state(app);
                 latest.put("disabled", new JSONArray(sorted(disabled)));
                 save(app, latest);
@@ -751,6 +765,34 @@ final class HomeMode {
         JSONArray a = s.optJSONArray(key);
         if (a != null) for (int i = 0; i < a.length(); i++) out.add(a.optString(i));
         return out;
+    }
+
+    /**
+     * What Free My TV turned off, kept in the TV's own settings too: an uninstall or Clear data erases our state file,
+     * and a new install must still tell its own work from what the person had turned off (#142).
+     */
+    private static final String RECORD = "free_my_tv_disabled";
+
+    private static Set<String> recorded(Adb adb) {
+        Set<String> out = new HashSet<>();
+        try {
+            String v = adb.shell("settings get global " + RECORD).trim();
+            if (!v.isEmpty() && !v.equals("null")) for (String pkg : v.split(",")) if (pkg.matches("[\\w.]+")) out.add(pkg);
+        } catch (IOException e) {
+            AppLog.w("could not read the record of what we turned off: " + e.getMessage());
+        }
+        return out;
+    }
+
+    private static void record(Adb adb, Set<String> disabled) {
+        List<String> list = new ArrayList<>();
+        for (String pkg : sorted(disabled)) if (pkg.matches("[\\w.]+")) list.add(pkg);
+        try {
+            adb.shell(list.isEmpty() ? "settings delete global " + RECORD
+                    : "settings put global " + RECORD + " " + String.join(",", list));
+        } catch (IOException e) {
+            AppLog.w("could not save the record of what we turned off: " + e.getMessage());
+        }
     }
 
     private static List<String> sorted(Set<String> set) {
