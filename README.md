@@ -223,7 +223,7 @@ reference (fix them by hand); the others were machine-made, and corrections from
   just `"other:{n}シーズン"`), and Android's plural rules pick the one for each number.
 - **Limits:** right-to-left languages (Arabic, Hebrew, Persian) would need the layout mirrored, so they aren't there
   yet. Chinese, Japanese, Korean and Hindi are drawn with the TV's system font (Inter has no such letters). The LG and
-  Samsung app still has English, Portuguese, Spanish and Russian only.
+  Samsung app has English, Portuguese, Spanish, German and Russian.
 
 ## Privacy
 
