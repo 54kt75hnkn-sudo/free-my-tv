@@ -594,7 +594,18 @@ final class Recs {
         return first;
     }
 
+    /** Services named in hide_services (config.properties), trimmed and lowercased: never a source of picks. */
+    private static final Set<String> HIDDEN = new HashSet<>();
+    static {
+        for (String s : Config.HIDE_SERVICES.split(",")) {
+            String key = s.trim().toLowerCase(Locale.ROOT);
+            if (!key.isEmpty()) HIDDEN.add(key);
+        }
+    }
+
+    /** The service's app is on the TV, and the service isn't hidden (an app the TV ships without a subscription, say). */
     private boolean installed(String pkg) {
+        if (!HIDDEN.isEmpty()) for (String[] s : SERVICES) if (s[2].equals(pkg) && HIDDEN.contains(s[1])) return false;
         return HomeApps.launchIntent(context.getPackageManager(), pkg) != null;
     }
 

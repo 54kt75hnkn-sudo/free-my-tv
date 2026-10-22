@@ -127,6 +127,7 @@ final class German {
             case "BRAVIA CORE button": return "BRAVIA-CORE-Taste";
             case "Disney+ button": return "Disney+-Taste";
             case "Crunchyroll button": return "Crunchyroll-Taste";
+            case "Google Play button": return "Google-Play-Taste";
             case "Sony default": return "Sony-Standard";
             case "Sony default: the button opens what it always did.": return "Sony-Standard: Die Taste öffnet, was sie immer geöffnet hat.";
             case "Not installed": return "Nicht installiert";

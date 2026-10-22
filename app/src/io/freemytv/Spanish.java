@@ -119,6 +119,7 @@ final class Spanish {
             case "BRAVIA CORE button": return "Botón BRAVIA CORE";
             case "Disney+ button": return "Botón Disney+";
             case "Crunchyroll button": return "Botón Crunchyroll";
+            case "Google Play button": return "Botón Google Play";
             case "Sony default": return "Predeterminado de Sony";
             case "Sony default: the button opens what it always did.": return "Predeterminado de Sony: el botón abre lo de siempre.";
             case "Not installed": return "No instalada";
