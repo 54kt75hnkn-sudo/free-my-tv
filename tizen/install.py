@@ -170,7 +170,7 @@ def main():
 
     if uninstall:
         out = sdb.shell('0 vd_appuninstall ' + package, r'spend time', 120)
-        print('Removed.' if re.search(r'uninstall completed|cmd_ret:0', out) else 'The TV said:\n' + out.strip())
+        print('Removed.' if re.search(r'uninstall completed', out) else 'The TV said:\n' + out.strip())
         return
 
     remote = caps.get('sdk_toolpath', '/home/owner/share/tmp/sdk_tools').rstrip('/') + '/FreeMyTV-tizen.wgt'
@@ -180,7 +180,7 @@ def main():
     sdb.push(remote, data)
     print('Installing ...')
     out = sdb.shell('0 vd_appinstall %s %s' % (package, remote), r'spend time', 120)
-    if not re.search(r'install completed|cmd_ret:0', out):
+    if not re.search(r'install completed', out):
         sys.exit('The TV didn\'t finish installing. It said:\n' + out.strip())
     sdb.shell('0 was_execute ' + app_id, r'launched|spend time', 20)
     print('Installed and open on the TV.')
