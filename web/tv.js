@@ -33,6 +33,47 @@ var TV = (function () {
     bridge.call(uri, JSON.stringify(params || {}));
   }
 
+  // webOS 6 gives Developer Mode apps only the "public" group, which leaves out listLaunchPoints. There the list comes
+  // from the TV's remote control API on 127.0.0.1:3000 (the one LG's phone app uses), which takes file:// pages.
+  // The TV asks once to allow it; the key it gives back is kept.
+  var SSAP_KEY = 'fmtv.ssapKey', SSAP_REFUSED = 'fmtv.ssapRefused';
+
+  /** One call to the remote control API; done(result) with null on failure. */
+  function ssap(uri, done) {
+    var ws = null, finished = false, key = null;
+    var timer = setTimeout(function () { finish(null); }, 90000);   // time to answer the TV's prompt
+    function finish(result) {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer);
+      try { ws.close(); } catch (e) {}
+      done(result);
+    }
+    try { key = localStorage.getItem(SSAP_KEY); } catch (e) {}
+    try { ws = new WebSocket('ws://127.0.0.1:3000'); } catch (e) { finish(null); return; }
+    ws.onopen = function () {
+      var payload = {forcePairing: false, pairingType: 'PROMPT',
+        manifest: {manifestVersion: 1, appVersion: '1.0', permissions: ['READ_INSTALLED_APPS']}};
+      if (key) payload['client-key'] = key;
+      ws.send(JSON.stringify({type: 'register', id: 'register', payload: payload}));
+    };
+    ws.onmessage = function (event) {
+      var m = null;
+      try { m = JSON.parse(event.data); } catch (e) {}
+      if (!m) return;
+      if (m.type === 'registered') {
+        try { localStorage.setItem(SSAP_KEY, m.payload['client-key']); } catch (e) {}
+        ws.send(JSON.stringify({type: 'request', id: 'call', uri: 'ssap://' + uri}));
+      } else if (m.id === 'call' || m.type === 'error') {
+        if (m.id === 'register' && m.type === 'error') {
+          try { localStorage.setItem(SSAP_REFUSED, '1'); } catch (e) {}   // the person said no on the TV
+        }
+        finish(m.type !== 'error' && m.payload && m.payload.returnValue !== false ? m.payload : null);
+      }
+    };
+    ws.onerror = ws.onclose = function () { finish(null); };
+  }
+
   // LG inputs: the antenna and the four HDMI ports, with the apps LG opens for them.
   var INPUTS = [
     {id: 'com.webos.app.livetv', key: 'live', label: null, symbol: 'live_tv'},
@@ -236,8 +277,7 @@ var TV = (function () {
         done(SAMPLE.map(function (s) { return {id: s[0], title: s[1], icon: '', color: s[2]}; }));
         return;
       }
-      luna('luna://com.webos.applicationManager/listLaunchPoints', {}, function (res) {
-        if (!res) { knownApps(done); return; }
+      function list(res) {
         var out = [];
         var points = res && res.launchPoints ? res.launchPoints : [];
         for (var i = 0; i < points.length; i++) {
@@ -245,7 +285,23 @@ var TV = (function () {
           if (!p.id || p.id === self || HIDDEN.test(p.id)) continue;
           out.push({id: p.id, title: p.title || p.id, icon: p.largeIcon || p.icon || '', color: p.bgColor || p.iconColor || ''});
         }
-        done(out);
+        return out;
+      }
+      luna('luna://com.webos.applicationManager/listLaunchPoints', {}, function (res) {
+        if (res) { done(list(res)); return; }
+        // Denied to Developer Mode apps (webOS 6 and newer): once the TV has allowed the remote control API, it lists
+        // every app with its icon; until then, the known apps the TV says it has, while the TV asks once (an answer
+        // only counts from the next load on, and a "no" isn't asked again).
+        var paired = false, refused = false;
+        try { paired = !!localStorage.getItem(SSAP_KEY); refused = !!localStorage.getItem(SSAP_REFUSED); } catch (e) {}
+        if (paired) {
+          ssap('com.webos.applicationManager/listLaunchPoints', function (res2) {
+            if (res2) done(list(res2)); else knownApps(done);
+          });
+          return;
+        }
+        knownApps(done);
+        if (!refused) ssap('com.webos.applicationManager/listLaunchPoints', function () {});
       });
     },
 
